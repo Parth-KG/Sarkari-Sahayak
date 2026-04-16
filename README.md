@@ -97,7 +97,7 @@ Literacy, language, and digital barriers prevent millions from accessing benefit
 - A [Vapi account](https://vapi.ai)
 - A [Qdrant Cloud account](https://qdrant.tech)
 - A [Groq API key](https://console.groq.com/)
-- `ngrok` for local webhook testing ([download](https://ngrok.com))
+- `cloudflared` for local webhook tunneling ([install guide](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/))
 
 ### Installation
 
@@ -145,11 +145,13 @@ Literacy, language, and digital barriers prevent millions from accessing benefit
    ```
    On first startup, the scheme data from `src/data.py` is automatically embedded and loaded into your Qdrant collection.
 
-6. **Expose your local server with ngrok** (for Vapi webhooks)
+6. **Expose your local server with Cloudflare Tunnel** (for Vapi webhooks)
    ```bash
-   ngrok http 8000
+   cloudflared tunnel --url http://localhost:8000
    ```
-   Copy the `https://...ngrok-free.app` URL and set it as your **Server URL** in the Vapi assistant settings.
+   Cloudflare will print a public URL like `https://<random-name>.trycloudflare.com`. Copy this URL and set it as your **Server URL** in the Vapi assistant settings.
+
+   > 💡 **Why Cloudflare Tunnel?** Unlike ngrok, it has no session timeouts on the free tier, gives you stable HTTPS out of the box, and doesn't rate-limit your webhooks. For a permanent tunnel with a custom domain, [authenticate cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/) with your Cloudflare account.
 
 7. **Test a call** from the Vapi dashboard or the demo link above.
 

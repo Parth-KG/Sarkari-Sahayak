@@ -1,7 +1,17 @@
+import os
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 from sentence_transformers import SentenceTransformer
 import uuid
+
+QDRANT_URL = os.getenv("QDRANT_URL")
+QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
+
+# If keys exist (Render), use Cloud. If not (Local), use Memory.
+if QDRANT_URL and QDRANT_API_KEY:
+    qdrant = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
+else:
+    qdrant = QdrantClient(":memory:")
 
 # 5 Core Schemes (English & Hindi)
 SCHEMES = [
@@ -34,6 +44,16 @@ qdrant = QdrantClient(":memory:")  # Runs fast in-memory for this setup
 
 def init_db():
     """Initializes Qdrant and embeds the schemes if not already done."""
+    # Check if collection exists to avoid errors on restart
+    try:
+        collections = qdrant.get_collections().collections
+        exists = any(c.name == "schemes" for c in collections)
+        if exists:
+            print("Collection already exists, skipping init.")
+            return
+    except Exception:
+        pass
+
     qdrant.create_collection(
         collection_name="schemes",
         vectors_config=VectorParams(size=384, distance=Distance.COSINE),

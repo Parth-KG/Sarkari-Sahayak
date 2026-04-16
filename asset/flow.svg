@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 280" width="1000" height="280">
+  <rect width="1000" height="280" fill="#FFFFFF"/>
+
+  <!-- Title -->
+  <text x="500" y="35" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="20" font-weight="bold" fill="#0F172A">
+    How It Works
+  </text>
+  <text x="500" y="55" text-anchor="middle" font-family="Calibri, Arial, sans-serif" font-size="12" fill="#64748B" font-style="italic">
+    Simple 4-step voice interaction
+  </text>
+
+  <!-- Arrow marker -->
+  <defs>
+    <marker id="flowArrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#0D9488"/>
+    </marker>
+  </defs>
+
+  <!-- Step 1: User Calls -->
+  <g transform="translate(40, 90)">
+    <rect x="0" y="0" width="200" height="160" rx="12" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+    <circle cx="100" cy="40" r="28" fill="#0D9488"/>
+    <!-- phone icon -->
+    <path d="M 90 32 L 98 32 Q 102 32, 102 36 L 102 44 Q 102 48, 98 48 L 94 48 L 108 62 L 118 52 Q 120 50, 122 52 L 126 56 Q 128 58, 126 60 L 118 68 Q 114 72, 110 68 L 86 44 Q 82 40, 86 36 L 90 32 Z" fill="#FFFFFF"/>
+    <text x="100" y="95" text-anchor="middle" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#0D9488" font-weight="bold">STEP 1</text>
+    <text x="100" y="118" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="15" font-weight="bold" fill="#0F172A">User Calls</text>
+    <text x="100" y="137" text-anchor="middle" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#334155">Speaks in Hindi</text>
+    <text x="100" y="150" text-anchor="middle" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#334155">or English</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <line x1="245" y1="170" x2="275" y2="170" stroke="#0D9488" stroke-width="2.5" marker-end="url(#flowArrow)"/>
+
+  <!-- Step 2: AI Understands -->
+  <g transform="translate(280, 90)">
+    <rect x="0" y="0" width="200" height="160" rx="12" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+    <circle cx="100" cy="40" r="28" fill="#1E293B"/>
+    <!-- brain icon -->
+    <circle cx="100" cy="40" r="16" fill="none" stroke="#FFFFFF" stroke-width="2"/>
+    <path d="M 92 36 Q 96 32, 100 36 Q 104 32, 108 36" stroke="#FFFFFF" stroke-width="1.8" fill="none"/>
+    <path d="M 92 44 Q 96 48, 100 44 Q 104 48, 108 44" stroke="#FFFFFF" stroke-width="1.8" fill="none"/>
+    <text x="100" y="95" text-anchor="middle" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#1E293B" font-weight="bold">STEP 2</text>
+    <text x="100" y="118" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="15" font-weight="bold" fill="#0F172A">AI Understands</text>
+    <text x="100" y="137" text-anchor="middle" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#334155">Vapi transcribes</text>
+    <text x="100" y="150" text-anchor="middle" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#334155">&amp; agent processes</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <line x1="485" y1="170" x2="515" y2="170" stroke="#0D9488" stroke-width="2.5" marker-end="url(#flowArrow)"/>
+
+  <!-- Step 3: Qdrant Retrieves -->
+  <g transform="translate(520, 90)">
+    <rect x="0" y="0" width="200" height="160" rx="12" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+    <circle cx="100" cy="40" r="28" fill="#0F766E"/>
+    <!-- DB icon -->
+    <ellipse cx="100" cy="32" rx="14" ry="4" fill="#FFFFFF"/>
+    <path d="M 86 32 L 86 44 Q 86 48, 100 48 Q 114 48, 114 44 L 114 32" fill="#FFFFFF"/>
+    <path d="M 86 44 L 86 50 Q 86 54, 100 54 Q 114 54, 114 50 L 114 44" fill="#FFFFFF" opacity="0.7"/>
+    <text x="100" y="95" text-anchor="middle" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#0F766E" font-weight="bold">STEP 3</text>
+    <text x="100" y="118" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="15" font-weight="bold" fill="#0F172A">Qdrant Retrieves</text>
+    <text x="100" y="137" text-anchor="middle" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#334155">Fetches schemes &amp;</text>
+    <text x="100" y="150" text-anchor="middle" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#334155">matches eligibility</text>
+  </g>
+
+  <!-- Arrow 3 -->
+  <line x1="725" y1="170" x2="755" y2="170" stroke="#0D9488" stroke-width="2.5" marker-end="url(#flowArrow)"/>
+
+  <!-- Step 4: Agent Responds -->
+  <g transform="translate(760, 90)">
+    <rect x="0" y="0" width="200" height="160" rx="12" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+    <circle cx="100" cy="40" r="28" fill="#0D9488"/>
+    <!-- speech bubble icon -->
+    <path d="M 82 32 L 114 32 Q 118 32, 118 36 L 118 46 Q 118 50, 114 50 L 104 50 L 98 56 L 98 50 L 86 50 Q 82 50, 82 46 L 82 36 Q 82 32, 86 32 Z" fill="#FFFFFF"/>
+    <circle cx="92" cy="41" r="1.5" fill="#0D9488"/>
+    <circle cx="100" cy="41" r="1.5" fill="#0D9488"/>
+    <circle cx="108" cy="41" r="1.5" fill="#0D9488"/>
+    <text x="100" y="95" text-anchor="middle" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#0D9488" font-weight="bold">STEP 4</text>
+    <text x="100" y="118" text-anchor="middle" font-family="Trebuchet MS, Arial, sans-serif" font-size="15" font-weight="bold" fill="#0F172A">Agent Responds</text>
+    <text x="100" y="137" text-anchor="middle" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#334155">Eligibility, docs</text>
+    <text x="100" y="150" text-anchor="middle" font-family="Calibri, Arial, sans-serif" font-size="11" fill="#334155">&amp; next steps</text>
+  </g>
+</svg>

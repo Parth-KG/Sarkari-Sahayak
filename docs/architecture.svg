@@ -77,7 +77,7 @@
 <g id="node6" class="node">
 <title>stt</title>
 <path fill="#fdeccb" stroke="black" d="M560.92,-567.99C560.92,-567.99 423.25,-567.99 423.25,-567.99 417.25,-567.99 411.25,-561.99 411.25,-555.99 411.25,-555.99 411.25,-543.99 411.25,-543.99 411.25,-537.99 417.25,-531.99 423.25,-531.99 423.25,-531.99 560.92,-531.99 560.92,-531.99 566.92,-531.99 572.92,-537.99 572.92,-543.99 572.92,-543.99 572.92,-555.99 572.92,-555.99 572.92,-561.99 566.92,-567.99 560.92,-567.99"/>
-<text xml:space="preserve" text-anchor="start" x="424.21" y="-550.59" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="12.00">Sarvam STT (saaras:v3)</text>
+<text xml:space="preserve" text-anchor="start" x="424.21" y="-550.59" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="12.00">Sarvam STT (saaras:v4)</text>
 <text xml:space="preserve" text-anchor="start" x="435.84" y="-540.49" font-family="Helvetica,sans-Serif" font-size="10.00">speech to text, Indic ASR</text>
 </g>
 <!-- vad&#45;&gt;stt -->

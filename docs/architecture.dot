@@ -15,7 +15,7 @@ digraph architecture {
     // the Pipecat pipeline (voice/core/pipeline.py), in order
     input   [fillcolor="#e6e3fb", label=<<b><font point-size="12">transport.input()</font></b><br/>caller audio into the pipeline>];
     vad     [fillcolor="#e6e3fb", label=<<b><font point-size="12">VAD + Smart Turn</font></b><br/>Silero VAD, 0.5 s stop · detects end of turn>];
-    stt     [fillcolor="#fdeccb", label=<<b><font point-size="12">Sarvam STT (saaras:v3)</font></b><br/>speech to text, Indic ASR>];
+    stt     [fillcolor="#fdeccb", label=<<b><font point-size="12">Sarvam STT (saaras:v4)</font></b><br/>speech to text, Indic ASR>];
     ivr     [fillcolor="#e6e3fb", label=<<b><font point-size="12">IVRGate</font></b><br/>keypad menu: 1 = Hindi · 2 = English, each line in its own voice<br/>locks STT + TTS language and voice · defaults to Hindi>];
     ctx     [fillcolor="#e6e3fb", label=<<b><font point-size="12">context aggregator</font></b><br/>assembles the turn · holds history>];
     llm     [fillcolor="#fdeccb", label=<<b><font point-size="12">Groq LLM — gpt-oss-20b</font></b><br/>low reasoning effort · translates tool queries to English<br/>replies in the caller's chosen language>];

@@ -106,7 +106,7 @@ flowchart TD
     lk --> vad
 
     subgraph bot ["Pipecat bot (python -m voice.main)"]
-        vad["Silero VAD + turn detection"] --> stt["Sarvam STT (saaras:v3)"]
+        vad["Silero VAD + turn detection"] --> stt["Sarvam STT (saaras:v4)"]
         stt --> ivr["IVR language gate: 1 = Hindi, 2 = English"]
         ivr --> llm["Groq LLM (openai/gpt-oss-20b)"]
         llm --> tts["Sarvam TTS (bulbul:v4-flash)"]
@@ -136,7 +136,7 @@ run on a worker thread so a slow search never blocks the audio loop.
    locks to Hindi. Locking adds a reply-language instruction to the LLM context and retunes STT
    and TTS (language and voice). All menu settings live in `voice/core/languages.py`.
 3. **Turn-taking.** Silero VAD (0.5 s of silence) starts and ends speech segments, and Pipecat's
-   default turn-stop strategy decides when the caller has finished. Sarvam `saaras:v3` transcribes.
+   default turn-stop strategy decides when the caller has finished. Sarvam `saaras:v4` transcribes.
 4. **Thinking.** Groq's `openai/gpt-oss-20b` runs with low reasoning effort and a 512-token cap to
    keep replies fast. The prompt (`voice/core/prompt.py`) tells it to ask about the caller's state,
    age, and occupation before searching, to translate every tool query into English, and to work
@@ -202,7 +202,7 @@ Each row becomes one Weaviate object in the `SarkariSchemesVoice` collection:
 | --- | --- |
 | Telephony | Twilio (phone number) → LiveKit Cloud (SIP bridge, real-time audio room) |
 | Voice orchestration | Pipecat, Silero VAD, Pipecat turn detection |
-| Speech | Sarvam AI: `saaras:v3` (STT), `bulbul:v4-flash` (TTS) |
+| Speech | Sarvam AI: `saaras:v4` (STT), `bulbul:v4-flash` (TTS) |
 | LLM | Groq: `openai/gpt-oss-20b`, low reasoning effort |
 | Embeddings | Cloudflare Workers AI: `@cf/baai/bge-large-en-v1.5` |
 | Vector store | Weaviate (self-hosted in Docker), hybrid dense + BM25 |
@@ -408,7 +408,7 @@ Sarkari-Sahayak/
 │   │   ├── tool.py                         # The 6 tool schemas and their handlers
 │   │   └── config.py                       # Loads and checks environment variables
 │   ├── services/
-│   │   ├── stt.py                          # Sarvam saaras:v3
+│   │   ├── stt.py                          # Sarvam saaras:v4
 │   │   ├── tts.py                          # Sarvam bulbul:v4-flash
 │   │   └── llm.py                          # Groq gpt-oss-20b
 │   ├── retrieval/
@@ -454,8 +454,8 @@ Most of these come from the team's backlog in `voice/to-be-fixed*.pdf`.
 - **One shared room.** Every caller joins `support-room`. Two people calling at once would end up
   in the same conversation, so this must change before the line handles more than one caller.
 - **Language testing.** Keypad selection has only been exercised through the browser timeout path,
-  not with real phone tones. Only Hindi has been tested end to end, and the `bulbul:v4-flash`
-  voices haven't been tried on a live call yet.
+  not with real phone tones. Only Hindi has been tested end to end, and `saaras:v4` and the
+  `bulbul:v4-flash` voices haven't been tried on a live call yet.
 - **Open token endpoint.** `GET /token` in `voice_server.py` has no auth and always issues the same
   identity.
 - **Latency.** Each tool call spends about 1.8 s on retrieval, about 1.1 s of it in reranking.

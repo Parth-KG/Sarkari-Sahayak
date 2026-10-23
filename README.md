@@ -106,10 +106,10 @@ flowchart TD
     lk --> vad
 
     subgraph bot ["Pipecat bot (python -m voice.main)"]
-        vad["Silero VAD + turn detection"] --> stt["Sarvam STT (saaras:v3)"]
+        vad["Silero VAD + turn detection"] --> stt["Sarvam STT (saaras:v4)"]
         stt --> ivr["IVR language gate: 1 = Hindi, 2 = English"]
         ivr --> llm["Groq LLM (openai/gpt-oss-20b)"]
-        llm --> tts["Sarvam TTS (bulbul:v3-beta)"]
+        llm --> tts["Sarvam TTS (bulbul:v4-flash)"]
     end
 
     tts --> lk
@@ -134,16 +134,18 @@ run on a worker thread so a slow search never blocks the audio loop.
    language. Speech is ignored until a key is pressed. Key 1 locks Hindi, key 2 locks English.
    With no valid key after 6 seconds the menu plays once more, and after a second timeout the call
    locks to Hindi. Locking adds a reply-language instruction to the LLM context and retunes STT
-   and TTS. All menu settings live in `voice/core/languages.py`.
+   and TTS (language and voice). All menu settings live in `voice/core/languages.py`.
 3. **Turn-taking.** Silero VAD (0.5 s of silence) starts and ends speech segments, and Pipecat's
-   default turn-stop strategy decides when the caller has finished. Sarvam `saaras:v3` transcribes.
+   default turn-stop strategy decides when the caller has finished. Sarvam `saaras:v4` transcribes.
 4. **Thinking.** Groq's `openai/gpt-oss-20b` runs with low reasoning effort and a 512-token cap to
    keep replies fast. The prompt (`voice/core/prompt.py`) tells it to ask about the caller's state,
    age, and occupation before searching, to translate every tool query into English, and to work
    the state or Central/State preference into the query text.
 5. **Looking it up.** The model calls one of six tools (next section) and answers only from what
    comes back.
-6. **Speaking.** Sarvam `bulbul:v3-beta` speaks the reply in the `aditya` voice at 1.4x pace.
+6. **Speaking.** Sarvam `bulbul:v4-flash` speaks the reply at 1.4x pace. Each v4 voice speaks one
+   language, so Hindi calls use `aditya_hi_conversational` and English calls use
+   `dev_en_conversational`.
 
 ---
 
@@ -200,7 +202,7 @@ Each row becomes one Weaviate object in the `SarkariSchemesVoice` collection:
 | --- | --- |
 | Telephony | Twilio (phone number) → LiveKit Cloud (SIP bridge, real-time audio room) |
 | Voice orchestration | Pipecat, Silero VAD, Pipecat turn detection |
-| Speech | Sarvam AI: `saaras:v3` (STT), `bulbul:v3-beta` (TTS) |
+| Speech | Sarvam AI: `saaras:v4` (STT), `bulbul:v4-flash` (TTS) |
 | LLM | Groq: `openai/gpt-oss-20b`, low reasoning effort |
 | Embeddings | Cloudflare Workers AI: `@cf/baai/bge-large-en-v1.5` |
 | Vector store | Weaviate (self-hosted in Docker), hybrid dense + BM25 |
@@ -234,17 +236,16 @@ python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 ```
 
-`voice/requirements.txt` is a full environment freeze made on Windows, including PyTorch and
-notebook tooling, so expect a large install. On Windows:
-
 ```bash
 pip install -r voice/requirements.txt
 ```
 
-On macOS and Linux, skip `pywin32`, which only installs on Windows:
+`voice/requirements.txt` is a lock file that works on Windows, macOS, and Linux. Don't edit it by
+hand: add or bump packages in `voice/requirements.in`, then regenerate the lock with
+[uv](https://docs.astral.sh/uv/):
 
 ```bash
-sed '/^pywin32==/d' voice/requirements.txt | pip install -r /dev/stdin
+uv pip compile voice/requirements.in --universal --python-version 3.11 -o voice/requirements.txt
 ```
 
 ### 3. Environment variables
@@ -272,15 +273,9 @@ The named volume keeps the data between restarts, so you only ingest once.
 
 ### 5. Ingest the scheme data
 
-`voice/retrieval/loader.py` and `voice/retrieval/ingest.py` read from `/app/data/`, the path inside
-an earlier ingest container that isn't part of this repo. For a local run, point them at `data/`:
-
-| File | Setting | Change to |
-| --- | --- | --- |
-| `voice/retrieval/loader.py` | `file_path` | `"data/schemes_compact_cleaned_merged_chunked.csv"` |
-| `voice/retrieval/ingest.py` | `PROGRESS_FILE` | `"data/ingest_progress.txt"` |
-
-Then run:
+The ingest reads `data/schemes_compact_cleaned_merged_chunked.csv` and keeps its checkpoint in
+`data/ingest_progress.txt`. To use a different folder, such as a mounted volume in a container,
+set `DATA_DIR`.
 
 ```bash
 python -m voice.retrieval.ingest --reset-progress
@@ -338,10 +333,9 @@ Set these in `voice/.env`:
 | `CLOUDFLARE_ACCOUNT_ID` | Yes | Embeddings, used during ingest and on every search |
 | `CLOUDFLARE_API_TOKEN` | Yes | Embeddings |
 | `WEAVIATE_HOST` | No | Weaviate host; defaults to `localhost` (ports 8080 and 50051) |
+| `DATA_DIR` | No | Folder with the scheme CSV and ingest checkpoint; defaults to the repo's `data/` |
 
 `voice/core/config.py` refuses to start if the LiveKit or Groq values are missing.
-`.env.example` also lists `QDRANT_URL`, `QDRANT_API_KEY`, and `HF_HUB_DISABLE_SYMLINKS`. These are
-left over from the earlier Qdrant-based version; the voice agent doesn't read them.
 
 ---
 
@@ -368,9 +362,8 @@ correct schemes, so with k = 3 the best possible average is 0.67.
 Reranking is the largest fixed cost. One query hit a one-off 5.8 s embedding spike, which pulls
 the mean total up to 2.35 s.
 
-To rerun, edit `GOLDEN_SET_PATH` and `RESULTS_PATH` at the top of `evaluate_retrieval.py` (they're
-hardcoded Windows paths), make sure Weaviate is running with data ingested, and run from the
-repository root:
+To rerun, make sure Weaviate is running with data ingested, then run from the repository root.
+The script reads the golden set and writes `eval_results.json` next to itself:
 
 ```bash
 PYTHONPATH=. python voice/eval/retrieval-evals/evaluate_retrieval.py
@@ -382,10 +375,10 @@ PYTHONPATH=. python voice/eval/retrieval-evals/evaluate_retrieval.py
 
 The repo also holds a text chat channel from an earlier version of the project:
 
-- **`frontend/`** is a React 19 + Vite + Tailwind CSS chat UI with an animated three.js
-  background, markdown replies, and example prompts such as "PM-Kisan eligibility". It runs with
+- **`frontend/`** is a React 19 + Vite + Tailwind CSS chat UI with an animated background,
+  markdown replies, and example prompts such as "PM-Kisan eligibility". It runs with
   `npm install && npm run dev` and sends `POST /chat` with `{ message, history }` to `VITE_API_URL`
-  (default `http://localhost:8000`). `frontend/src_FinalVersion/` is a snapshot copy of `src/`.
+  (default `http://localhost:8000`). See [`frontend/README.md`](frontend/README.md).
 - **`chatbot/`** holds the matching chat backends. They were built on Qdrant, and both fail at
   import today: `chat_server.py` needs `chatbot/data/query.py`, and `server.py` needs `src.core`
   and `data.scheme_tool`, none of which are in the repo.
@@ -403,7 +396,8 @@ Sarkari-Sahayak/
 │   ├── main.py                             # Entry point: joins support-room and runs the pipeline
 │   ├── voice_server.py                     # FastAPI alternative: /token, /ws, /health
 │   ├── generate_token.py                   # Prints a LiveKit join token for local testing
-│   ├── requirements.txt                    # Full dependency freeze (made on Windows)
+│   ├── requirements.in                     # Direct dependencies (edit this)
+│   ├── requirements.txt                    # Lock file generated from requirements.in
 │   ├── .env.example                        # Template for API keys
 │   ├── core/
 │   │   ├── pipeline.py                     # Assembles the Pipecat pipeline
@@ -414,8 +408,8 @@ Sarkari-Sahayak/
 │   │   ├── tool.py                         # The 6 tool schemas and their handlers
 │   │   └── config.py                       # Loads and checks environment variables
 │   ├── services/
-│   │   ├── stt.py                          # Sarvam saaras:v3
-│   │   ├── tts.py                          # Sarvam bulbul:v3-beta
+│   │   ├── stt.py                          # Sarvam saaras:v4
+│   │   ├── tts.py                          # Sarvam bulbul:v4-flash
 │   │   └── llm.py                          # Groq gpt-oss-20b
 │   ├── retrieval/
 │   │   ├── loader.py                       # CSV -> LangChain Documents
@@ -426,7 +420,7 @@ Sarkari-Sahayak/
 │   │   └── ingest.py                       # Batched, resumable embed + upsert
 │   ├── eval/retrieval-evals/               # Golden set, eval script, latest results
 │   ├── to-be-fixed*.pdf                    # Engineering backlog
-│   └── sarkari-sahayak-voice-architecture.html   # Walkthrough page (predates the move to Weaviate)
+│   └── sarkari-sahayak-voice-architecture.html   # Walkthrough page
 ├── data/
 │   ├── updated_data.csv                    # Raw myScheme export
 │   ├── compact_data_cleaning_chunked_sections.ipynb   # Cleaning and chunking notebook
@@ -434,7 +428,7 @@ Sarkari-Sahayak/
 │   └── ingest_progress.txt                 # Ingest resume checkpoint
 ├── frontend/                               # Web chat UI (see Web Chat)
 ├── chatbot/                                # Earlier chat backends (not currently runnable)
-├── docs/                                   # Architecture and schema diagrams
+├── docs/                                   # Architecture (.dot source) and schema diagrams
 └── LICENSE
 ```
 
@@ -460,7 +454,8 @@ Most of these come from the team's backlog in `voice/to-be-fixed*.pdf`.
 - **One shared room.** Every caller joins `support-room`. Two people calling at once would end up
   in the same conversation, so this must change before the line handles more than one caller.
 - **Language testing.** Keypad selection has only been exercised through the browser timeout path,
-  not with real phone tones. Only Hindi has been tested end to end.
+  not with real phone tones. Only Hindi has been tested end to end, and `saaras:v4` and the
+  `bulbul:v4-flash` voices haven't been tried on a live call yet.
 - **Open token endpoint.** `GET /token` in `voice_server.py` has no auth and always issues the same
   identity.
 - **Latency.** Each tool call spends about 1.8 s on retrieval, about 1.1 s of it in reranking.
